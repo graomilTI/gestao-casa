@@ -430,6 +430,81 @@ tr:last-child td { border-bottom: none; }
   display: inline-block;
 }
 
+/* ---------- Rotina familiar ---------- */
+.routine-progress {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.routine-progress .bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: #232838;
+  overflow: hidden;
+}
+.routine-progress .bar > span {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 999px;
+  transition: width .25s ease;
+}
+.routine-progress .label {
+  font-size: 0.84rem;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+.routine-list { display: flex; flex-direction: column; gap: 10px; }
+.routine-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  transition: opacity .15s ease;
+}
+.routine-item.done { opacity: 0.55; }
+.routine-item.done h4 { text-decoration: line-through; }
+.routine-checkbox {
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.routine-item .body { flex: 1; min-width: 0; }
+.routine-item .body h4 { margin: 0 0 4px; font-size: 0.95rem; }
+.routine-item .body p { margin: 0 0 8px; font-size: 0.82rem; color: var(--color-muted); }
+.routine-item .actions { flex-shrink: 0; }
+
+.weekday-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+.weekday-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.weekday-pill input { display: none; }
+.weekday-pill.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
 @media (max-width: 880px) {
   .app-shell { flex-direction: column; }
   .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; }

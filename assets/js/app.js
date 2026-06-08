@@ -5,6 +5,7 @@ const PAGES = [
   { id: 'financeiro', href: 'financeiro.html', label: 'Financeiro', icon: '💰' },
   { id: 'agenda', href: 'agenda.html', label: 'Agenda', icon: '📅' },
   { id: 'tarefas', href: 'tarefas.html', label: 'Tarefas', icon: '✅' },
+  { id: 'rotina', href: 'rotina.html', label: 'Rotina familiar', icon: '🔄' },
 ];
 
 const MEMBER_COLORS = ['#6366f1', '#ec4899', '#16a34a', '#d97706', '#0ea5e9', '#9333ea', '#dc2626', '#0d9488'];

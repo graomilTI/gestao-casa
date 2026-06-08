@@ -104,6 +104,41 @@ create index if not exists idx_tasks_household_status
   on tasks (household_id, status);
 
 -- ============================================================
+-- TABELA: routine_activities (atividades da rotina diária da família)
+-- ============================================================
+create table if not exists routine_activities (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid not null references households(id) on delete cascade,
+  created_by uuid not null references auth.users(id) on delete cascade,
+  assigned_to uuid references household_members(id) on delete set null,
+  title text not null,
+  description text,
+  time_of_day time,
+  weekdays smallint[] not null default '{0,1,2,3,4,5,6}',
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_routine_activities_household
+  on routine_activities (household_id);
+
+-- ============================================================
+-- TABELA: routine_checks ("check" de uma atividade em um dia específico)
+-- ============================================================
+create table if not exists routine_checks (
+  id uuid primary key default gen_random_uuid(),
+  activity_id uuid not null references routine_activities(id) on delete cascade,
+  household_id uuid not null references households(id) on delete cascade,
+  check_date date not null default current_date,
+  checked_by uuid references household_members(id) on delete set null,
+  checked_at timestamptz not null default now(),
+  unique (activity_id, check_date)
+);
+
+create index if not exists idx_routine_checks_activity_date
+  on routine_checks (activity_id, check_date);
+
+-- ============================================================
 -- FUNÇÃO AUXILIAR: verifica se o usuário pertence à casa
 -- ============================================================
 create or replace function is_household_member(p_household_id uuid)
@@ -196,6 +231,8 @@ alter table finance_categories enable row level security;
 alter table finance_transactions enable row level security;
 alter table agenda_events enable row level security;
 alter table tasks enable row level security;
+alter table routine_activities enable row level security;
+alter table routine_checks enable row level security;
 
 -- households: membros podem ver; quem cria pode inserir
 drop policy if exists "households_select" on households;
@@ -279,4 +316,34 @@ create policy "tasks_update" on tasks
 
 drop policy if exists "tasks_delete" on tasks;
 create policy "tasks_delete" on tasks
+  for delete using (is_household_member(household_id));
+
+-- routine_activities
+drop policy if exists "routine_activities_select" on routine_activities;
+create policy "routine_activities_select" on routine_activities
+  for select using (is_household_member(household_id));
+
+drop policy if exists "routine_activities_insert" on routine_activities;
+create policy "routine_activities_insert" on routine_activities
+  for insert with check (is_household_member(household_id) and created_by = auth.uid());
+
+drop policy if exists "routine_activities_update" on routine_activities;
+create policy "routine_activities_update" on routine_activities
+  for update using (is_household_member(household_id));
+
+drop policy if exists "routine_activities_delete" on routine_activities;
+create policy "routine_activities_delete" on routine_activities
+  for delete using (is_household_member(household_id));
+
+-- routine_checks
+drop policy if exists "routine_checks_select" on routine_checks;
+create policy "routine_checks_select" on routine_checks
+  for select using (is_household_member(household_id));
+
+drop policy if exists "routine_checks_insert" on routine_checks;
+create policy "routine_checks_insert" on routine_checks
+  for insert with check (is_household_member(household_id));
+
+drop policy if exists "routine_checks_delete" on routine_checks;
+create policy "routine_checks_delete" on routine_checks
   for delete using (is_household_member(household_id));

@@ -3,7 +3,7 @@
 // deixando passar direto requisições de outras origens (Supabase, CDN do supabase-js)
 // para nunca servir dados financeiros/agenda/tarefas desatualizados do cache.
 
-const CACHE_NAME = 'gestao-casa-v1';
+const CACHE_NAME = 'gestao-casa-v2';
 
 const APP_SHELL = [
   './',
@@ -13,6 +13,7 @@ const APP_SHELL = [
   './financeiro.html',
   './agenda.html',
   './tarefas.html',
+  './rotina.html',
   './manifest.json',
   './assets/css/style.css',
   './assets/js/config.js',
@@ -24,6 +25,7 @@ const APP_SHELL = [
   './assets/js/financeiro.js',
   './assets/js/agenda.js',
   './assets/js/tarefas.js',
+  './assets/js/rotina.js',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/icon-maskable-512.png',

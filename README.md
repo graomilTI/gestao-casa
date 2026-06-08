@@ -16,6 +16,9 @@ no front-end e [Supabase](https://supabase.com) (Postgres + Auth) no back-end.
   cor, descrição)
 - **Tarefas** — quadro kanban (Pendente / Em andamento / Concluída) com
   responsável, prioridade, prazo e recorrência
+- **Rotina familiar** — lista das atividades programadas para o dia (com
+  horário, responsável e dias da semana) e opção de marcar "check" em cada uma
+  ao concluí-la
 
 ## Stack
 
@@ -30,9 +33,9 @@ no front-end e [Supabase](https://supabase.com) (Postgres + Auth) no back-end.
 1. Acesse [supabase.com](https://supabase.com) e crie um novo projeto.
 2. No **SQL Editor**, execute o script [`supabase/schema.sql`](supabase/schema.sql).
    Ele cria todas as tabelas (`households`, `household_members`,
-   `finance_categories`, `finance_transactions`, `agenda_events`, `tasks`) e as
-   políticas de Row Level Security que garantem que cada "casa" só vê seus
-   próprios dados.
+   `finance_categories`, `finance_transactions`, `agenda_events`, `tasks`,
+   `routine_activities`, `routine_checks`) e as políticas de Row Level Security
+   que garantem que cada "casa" só vê seus próprios dados.
 3. Em **Project Settings → API**, copie a **Project URL** e a **anon public key**.
 
 ### 2. Configure as credenciais do front-end
@@ -74,8 +77,8 @@ ou com a extensão **Live Server** do VS Code. Depois acesse
 2. Na tela de configuração, **crie uma casa nova** (você vira administrador(a) e
    recebe um código de convite) ou **entre em uma casa existente** informando o
    código que outro morador compartilhou com você.
-3. Use o menu lateral para navegar entre **Início**, **Financeiro**, **Agenda**
-   e **Tarefas**.
+3. Use o menu lateral para navegar entre **Início**, **Financeiro**, **Agenda**,
+   **Tarefas** e **Rotina familiar**.
 
 ## Estrutura do projeto
 
@@ -86,6 +89,7 @@ ou com a extensão **Live Server** do VS Code. Depois acesse
 ├── financeiro.html       # Controle financeiro
 ├── agenda.html           # Agenda / calendário
 ├── tarefas.html          # Divisão de tarefas (kanban)
+├── rotina.html           # Rotina familiar (atividades do dia com check)
 ├── assets/
 │   ├── css/style.css     # Estilos compartilhados
 │   └── js/
@@ -97,7 +101,8 @@ ou com a extensão **Live Server** do VS Code. Depois acesse
 │       ├── dashboard.js
 │       ├── financeiro.js
 │       ├── agenda.js
-│       └── tarefas.js
+│       ├── tarefas.js
+│       └── rotina.js
 └── supabase/
     └── schema.sql        # Tabelas + Row Level Security
 ```
