@@ -31,21 +31,11 @@
     const myName = document.getElementById('new-household-display-name').value.trim() || displayName;
 
     try {
-      const { data: household, error } = await window.supabaseClient
-        .from('households')
-        .insert({ name, created_by: session.user.id })
-        .select()
-        .single();
-      if (error) throw error;
-
-      const { error: memberError } = await window.supabaseClient.from('household_members').insert({
-        household_id: household.id,
-        user_id: session.user.id,
-        display_name: myName,
-        role: 'admin',
-        color: MEMBER_COLORS[0],
+      const { error } = await window.supabaseClient.rpc('create_household', {
+        p_name: name,
+        p_display_name: myName,
       });
-      if (memberError) throw memberError;
+      if (error) throw error;
 
       window.location.href = 'dashboard.html';
     } catch (err) {
@@ -66,29 +56,11 @@
     const myName = document.getElementById('join-household-display-name').value.trim() || displayName;
 
     try {
-      const { data: household, error } = await window.supabaseClient
-        .from('households')
-        .select('*')
-        .eq('invite_code', code)
-        .maybeSingle();
-      if (error) throw error;
-      if (!household) throw new Error('Código de convite não encontrado.');
-
-      const { count } = await window.supabaseClient
-        .from('household_members')
-        .select('*', { count: 'exact', head: true })
-        .eq('household_id', household.id);
-
-      const color = MEMBER_COLORS[(count || 0) % MEMBER_COLORS.length];
-
-      const { error: memberError } = await window.supabaseClient.from('household_members').insert({
-        household_id: household.id,
-        user_id: session.user.id,
-        display_name: myName,
-        role: 'membro',
-        color,
+      const { error } = await window.supabaseClient.rpc('join_household', {
+        p_invite_code: code,
+        p_display_name: myName,
       });
-      if (memberError) throw memberError;
+      if (error) throw error;
 
       window.location.href = 'dashboard.html';
     } catch (err) {

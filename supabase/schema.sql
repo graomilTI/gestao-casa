@@ -120,6 +120,74 @@ as $$
 $$;
 
 -- ============================================================
+-- FUNÇÕES: criar ou entrar em uma casa
+--
+-- Necessárias porque, ao criar uma "households" e tentar retorná-la
+-- (INSERT ... RETURNING), a política de SELECT (is_household_member)
+-- ainda não é satisfeita — o usuário só vira membro no passo seguinte.
+-- Por isso a criação da casa e a inclusão do membro acontecem juntas,
+-- de forma atômica, dentro de uma função SECURITY DEFINER que usa
+-- auth.uid() para garantir que o usuário só age em nome de si mesmo.
+-- ============================================================
+create or replace function create_household(p_name text, p_display_name text)
+returns households
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_household households;
+begin
+  if auth.uid() is null then
+    raise exception 'Usuário não autenticado.';
+  end if;
+
+  insert into households (name, created_by)
+  values (p_name, auth.uid())
+  returning * into v_household;
+
+  insert into household_members (household_id, user_id, display_name, role, color)
+  values (v_household.id, auth.uid(), p_display_name, 'admin', '#6366f1');
+
+  return v_household;
+end;
+$$;
+
+create or replace function join_household(p_invite_code text, p_display_name text)
+returns households
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_household households;
+  v_count int;
+  v_colors text[] := array['#6366f1','#ec4899','#16a34a','#d97706','#0ea5e9','#9333ea','#dc2626','#0d9488'];
+begin
+  if auth.uid() is null then
+    raise exception 'Usuário não autenticado.';
+  end if;
+
+  select * into v_household from households where invite_code = lower(p_invite_code);
+  if not found then
+    raise exception 'Código de convite não encontrado.';
+  end if;
+
+  select count(*) into v_count from household_members where household_id = v_household.id;
+
+  insert into household_members (household_id, user_id, display_name, role, color)
+  values (v_household.id, auth.uid(), p_display_name, 'membro', v_colors[(v_count % array_length(v_colors, 1)) + 1]);
+
+  return v_household;
+end;
+$$;
+
+revoke all on function create_household(text, text) from public;
+revoke all on function join_household(text, text) from public;
+grant execute on function create_household(text, text) to authenticated;
+grant execute on function join_household(text, text) to authenticated;
+
+-- ============================================================
 -- ROW LEVEL SECURITY
 -- ============================================================
 alter table households enable row level security;
