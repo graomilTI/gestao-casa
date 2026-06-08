@@ -51,8 +51,9 @@ window.SUPABASE_CONFIG = {
 };
 ```
 
-> `assets/js/config.js` está no `.gitignore` — suas credenciais não vão para o
-> repositório.
+> A `anonKey` é a chave **pública** do Supabase — ela é segura para ficar no
+> repositório e em sites estáticos (a proteção real dos dados vem das políticas
+> de Row Level Security do banco, não do segredo dessa chave).
 
 ### 3. Rode localmente
 

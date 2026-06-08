@@ -1,6 +1,3 @@
-# Credenciais locais do Supabase (não versionar)
-assets/js/config.js
-
 # Sistema operacional / editores
 .DS_Store
 Thumbs.db
