@@ -286,6 +286,7 @@ create policy "finance_transactions_delete" on finance_transactions
 
 -- agenda_events
 drop policy if exists "agenda_events_all" on agenda_events;
+drop policy if exists "agenda_events_select" on agenda_events;
 create policy "agenda_events_select" on agenda_events
   for select using (is_household_member(household_id));
 
