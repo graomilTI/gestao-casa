@@ -31,12 +31,14 @@
     const categoria = params.get('categoria');
     const tipo = params.get('tipo');
     const descricao = params.get('descricao');
-    if (!categoria && !tipo && !descricao) return;
+    const valor = params.get('valor');
+    if (!categoria && !tipo && !descricao && !valor) return;
 
     openTransactionModal(null);
     if (tipo) document.getElementById('transaction-type').value = tipo;
     if (categoria) document.getElementById('transaction-category').value = categoria;
     if (descricao) document.getElementById('transaction-description').value = descricao;
+    if (valor) document.getElementById('transaction-amount').value = valor;
 
     window.history.replaceState({}, '', 'financeiro.html');
   }

@@ -32,6 +32,9 @@
     const params = new URLSearchParams({ tipo: 'despesa' });
     if (lastResult.categoria_id) params.set('categoria', lastResult.categoria_id);
     if (lastResult.categoria_nome) params.set('descricao', lastResult.categoria_nome);
+    if (lastResult.valor != null && !Number.isNaN(Number(lastResult.valor))) {
+      params.set('valor', Number(lastResult.valor).toFixed(2));
+    }
     window.location.href = `financeiro.html?${params.toString()}`;
   });
 
@@ -156,6 +159,10 @@
   function showResult(resultado) {
     const nome = resultado.categoria_nome || 'Não identificado';
     document.getElementById('result-categoria').textContent = nome;
+
+    const valorEl = document.getElementById('result-valor');
+    const valor = resultado.valor != null ? Number(resultado.valor) : null;
+    valorEl.textContent = valor != null && !Number.isNaN(valor) ? formatCurrency(valor) : 'Valor não identificado';
 
     const existente = resultado.categoria_id
       ? despesaCategories.some((c) => c.id === resultado.categoria_id)

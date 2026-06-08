@@ -21,6 +21,7 @@ interface Categoria {
 interface Resultado {
   categoria_id: string | null;
   categoria_nome: string | null;
+  valor: number | null;
   confianca: "alta" | "media" | "baixa";
   motivo: string;
 }
@@ -29,7 +30,7 @@ interface Resultado {
 async function classificar(texto: string, categorias: Categoria[], apiKey: string): Promise<Resultado> {
   const lista = categorias.map((c) => `- ${c.id}: ${c.name}`).join("\n") || "(nenhuma categoria de despesa cadastrada)";
 
-  const prompt = `Você analisa comprovantes de pagamento brasileiros (PIX, TED, boleto, cartão) e identifica a que tipo de despesa doméstica eles pertencem.
+  const prompt = `Você analisa comprovantes de pagamento brasileiros (PIX, TED, boleto, cartão) e identifica a que tipo de despesa doméstica eles pertencem, além do valor pago.
 
 Texto extraído do comprovante em PDF:
 """
@@ -39,10 +40,11 @@ ${texto.slice(0, 6000)}
 Categorias de despesa já cadastradas nesta casa (use o id exatamente como está):
 ${lista}
 
-Escolha a categoria existente que melhor representa essa despesa. Retorne APENAS um JSON válido neste formato:
+Escolha a categoria existente que melhor representa essa despesa e identifique o valor TOTAL efetivamente pago/transferido (ignore tarifas, saldo em conta, limite disponível ou outros valores que não sejam o valor da operação). Retorne APENAS um JSON válido neste formato:
 {
   "categoria_id": "<id de uma das categorias acima, ou null se nenhuma combinar bem>",
   "categoria_nome": "<nome da categoria escolhida, ou uma sugestão de nome de categoria nova caso nenhuma combine>",
+  "valor": <valor pago como número, usando ponto decimal, ex.: 129.90, ou null se não encontrar nenhum valor no texto>,
   "confianca": "alta" | "media" | "baixa",
   "motivo": "<explicação breve em português, em até 1 frase, do porquê dessa categoria>"
 }

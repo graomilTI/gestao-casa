@@ -21,8 +21,9 @@ no front-end e [Supabase](https://supabase.com) (Postgres + Auth) no back-end.
   ao concluí-la
 - **Identificar despesa por comprovante** — pelo celular, compartilhe o PDF do
   comprovante de pagamento (ou selecione o arquivo) direto para o app; o texto
-  é lido localmente e uma IA (Groq) sugere o tipo de despesa entre as
-  categorias já cadastradas, com atalho para já abrir o lançamento preenchido
+  é lido localmente e uma IA (Groq) sugere o tipo de despesa e o valor pago
+  entre as categorias já cadastradas, com atalho para já abrir o lançamento
+  preenchido (categoria, descrição e valor)
 
 ## Stack
 
