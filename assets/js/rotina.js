@@ -44,6 +44,7 @@
       return;
     }
     activities = data || [];
+    renderAllActivities();
     await loadChecks();
   }
 
@@ -92,6 +93,39 @@
         <div class="body">
           <h4>${a.time_of_day ? formatTime(a.time_of_day) + ' · ' : ''}${escapeHtml(a.title)}</h4>
           ${a.description ? `<p>${escapeHtml(a.description)}</p>` : ''}
+          ${memberLabel(members, a.assigned_to)}
+        </div>
+        <div class="actions">
+          <button class="btn secondary small" data-edit="${a.id}">Editar</button>
+        </div>
+      </div>`;
+  }
+
+  function renderAllActivities() {
+    const container = document.getElementById('routine-all-list');
+
+    if (activities.length === 0) {
+      container.innerHTML = '<div class="empty-state">Nenhuma atividade cadastrada ainda.</div>';
+      return;
+    }
+
+    container.innerHTML = activities.map(allActivityHtml).join('');
+    container.querySelectorAll('[data-edit]').forEach((btn) =>
+      btn.addEventListener('click', () => openActivityModal(btn.dataset.edit))
+    );
+  }
+
+  function allActivityHtml(a) {
+    const days = a.weekdays || [];
+    const badges = WEEKDAYS.map(
+      (d) => `<span class="weekday-pill small ${days.includes(d.value) ? 'active' : ''}">${d.label}</span>`
+    ).join('');
+    return `
+      <div class="routine-item">
+        <div class="body">
+          <h4>${a.time_of_day ? formatTime(a.time_of_day) + ' · ' : ''}${escapeHtml(a.title)}</h4>
+          ${a.description ? `<p>${escapeHtml(a.description)}</p>` : ''}
+          <div class="weekday-picker" style="margin-bottom:8px;">${badges}</div>
           ${memberLabel(members, a.assigned_to)}
         </div>
         <div class="actions">

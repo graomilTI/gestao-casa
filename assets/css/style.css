@@ -504,6 +504,14 @@ tr:last-child td { border-bottom: none; }
   border-color: var(--color-primary);
   color: #fff;
 }
+.weekday-pill.small {
+  width: 30px;
+  height: 26px;
+  font-size: 0.66rem;
+  cursor: default;
+  opacity: 0.45;
+}
+.weekday-pill.small.active { opacity: 1; }
 
 @media (max-width: 880px) {
   .app-shell { flex-direction: column; }
