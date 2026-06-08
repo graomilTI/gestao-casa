@@ -79,9 +79,12 @@ Deno.serve(async (req) => {
 
   webpush.setVapidDetails(vapidSubject, VAPID_PUBLIC_KEY, vapidPrivateKey);
 
+  const bodyParts = [notif.category_name || "Sem categoria"];
+  if (notif.description) bodyParts.push(notif.description);
+
   const payload = JSON.stringify({
-    title: "Nova despesa lançada",
-    body: `${senderName} · ${notif.category_name || "Sem categoria"} · ${formatBRL(Number(notif.amount))} · ${notif.description}`,
+    title: `💸 ${senderName} lançou ${formatBRL(Number(notif.amount))}`,
+    body: bodyParts.join(" · "),
     tag: `finance-notif-${notif.id}`,
     url: "./financeiro.html",
   });

@@ -180,9 +180,11 @@
 
     const quem = memberName(n.created_by);
     const categoria = n.category_name || 'Sem categoria';
-    const title = 'Nova despesa lançada';
+    const title = `💸 ${quem} lançou ${formatCurrency(n.amount)}`;
+    const bodyParts = [categoria];
+    if (n.description) bodyParts.push(n.description);
     const options = {
-      body: `${quem} · ${categoria} · ${formatCurrency(n.amount)}`,
+      body: bodyParts.join(' · '),
       icon: 'assets/icons/icon-192.png',
       badge: 'assets/icons/icon-192.png',
       tag: `finance-notif-${n.id}`,
