@@ -24,6 +24,10 @@ no front-end e [Supabase](https://supabase.com) (Postgres + Auth) no back-end.
   é lido localmente e uma IA (Groq) sugere o tipo de despesa e o valor pago
   entre as categorias já cadastradas, com atalho para já abrir o lançamento
   preenchido (categoria, descrição e valor)
+- **Avisos de lançamentos** — sempre que alguém lança uma despesa, os outros
+  moradores recebem um aviso em tempo real (sino na barra lateral) com a
+  categoria e o valor, além de uma notificação do sistema (PWA) se a permissão
+  estiver concedida
 
 ## Stack
 
@@ -38,8 +42,10 @@ no front-end e [Supabase](https://supabase.com) (Postgres + Auth) no back-end.
 1. Acesse [supabase.com](https://supabase.com) e crie um novo projeto.
 2. No **SQL Editor**, execute o script [`supabase/schema.sql`](supabase/schema.sql).
    Ele cria todas as tabelas (`households`, `household_members`,
-   `finance_categories`, `finance_transactions`, `agenda_events`, `tasks`,
-   `routine_activities`, `routine_checks`) e as políticas de Row Level Security
+   `finance_categories`, `finance_transactions`, `finance_notifications`,
+   `finance_notification_reads`, `agenda_events`, `tasks`,
+   `routine_activities`, `routine_checks`), o gatilho que gera os avisos de
+   despesa e as políticas de Row Level Security
    que garantem que cada "casa" só vê seus próprios dados.
 3. Em **Project Settings → API**, copie a **Project URL** e a **anon public key**.
 
@@ -100,8 +106,13 @@ ou com a extensão **Live Server** do VS Code. Depois acesse
    **Tarefas**, **Rotina familiar** e **Comprovante**.
 4. Para identificar uma despesa pelo comprovante, abra **Comprovante** pelo
    celular: use o botão **Compartilhar** do app do banco e escolha "Gestão de
-   Casa" (ou selecione o PDF manualmente). A IA sugere a categoria e oferece um
-   atalho para já abrir o lançamento de despesa preenchido.
+   Casa" (ou selecione o PDF manualmente). A IA sugere a categoria e o valor, e
+   oferece um atalho para já abrir o lançamento de despesa preenchido.
+5. Sempre que alguém lançar uma despesa em **Financeiro**, os demais moradores
+   recebem um aviso instantâneo no sino 🔔 da barra lateral (categoria e
+   valor). Ao clicar no sino pela primeira vez, o navegador pode pedir
+   permissão para enviar **notificações do sistema** — aceite para também
+   receber o aviso fora da aba do app.
 
 ## Estrutura do projeto
 
@@ -120,6 +131,7 @@ ou com a extensão **Live Server** do VS Code. Depois acesse
 │       ├── config.example.js   # Modelo de configuração do Supabase
 │       ├── supabase-client.js  # Inicialização do cliente supabase-js
 │       ├── app.js              # Sessão, layout e helpers compartilhados
+│       ├── notifications.js    # Sino de avisos de despesas (tempo real + PWA)
 │       ├── auth.js             # Login / cadastro
 │       ├── setup.js            # Criar / entrar em uma casa
 │       ├── dashboard.js

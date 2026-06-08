@@ -3,7 +3,7 @@
 // deixando passar direto requisições de outras origens (Supabase, CDN do supabase-js)
 // para nunca servir dados financeiros/agenda/tarefas desatualizados do cache.
 
-const CACHE_NAME = 'gestao-casa-v3';
+const CACHE_NAME = 'gestao-casa-v4';
 const SHARE_CACHE = 'gestao-casa-shared-file';
 const SHARED_FILE_KEY = '/shared-comprovante';
 
@@ -22,6 +22,7 @@ const APP_SHELL = [
   './assets/js/config.js',
   './assets/js/supabase-client.js',
   './assets/js/app.js',
+  './assets/js/notifications.js',
   './assets/js/auth.js',
   './assets/js/setup.js',
   './assets/js/dashboard.js',

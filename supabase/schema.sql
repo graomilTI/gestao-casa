@@ -64,6 +64,58 @@ create index if not exists idx_finance_transactions_household_date
   on finance_transactions (household_id, occurred_on desc);
 
 -- ============================================================
+-- TABELAS: finance_notifications / finance_notification_reads
+-- (avisos para a casa toda quando alguém lança uma despesa)
+-- ============================================================
+create table if not exists finance_notifications (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid not null references households(id) on delete cascade,
+  transaction_id uuid references finance_transactions(id) on delete cascade,
+  created_by uuid not null references auth.users(id) on delete cascade,
+  category_name text,
+  description text not null,
+  amount numeric(12,2) not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_finance_notifications_household_created
+  on finance_notifications (household_id, created_at desc);
+
+create table if not exists finance_notification_reads (
+  notification_id uuid not null references finance_notifications(id) on delete cascade,
+  member_id uuid not null references household_members(id) on delete cascade,
+  read_at timestamptz not null default now(),
+  primary key (notification_id, member_id)
+);
+
+-- Sempre que uma despesa é lançada, grava um aviso para a casa toda.
+-- SECURITY DEFINER: o gatilho roda com privilégios do dono (postgres),
+-- que tem BYPASSRLS, então o INSERT funciona independente de quem lançou.
+create or replace function notify_despesa_lancada()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_categoria text;
+begin
+  if new.type = 'despesa' then
+    select name into v_categoria from finance_categories where id = new.category_id;
+
+    insert into finance_notifications (household_id, transaction_id, created_by, category_name, description, amount)
+    values (new.household_id, new.id, new.created_by, v_categoria, new.description, new.amount);
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_notify_despesa_lancada on finance_transactions;
+create trigger trg_notify_despesa_lancada
+  after insert on finance_transactions
+  for each row execute function notify_despesa_lancada();
+
+-- ============================================================
 -- TABELA: agenda_events (eventos da agenda da casa)
 -- ============================================================
 create table if not exists agenda_events (
@@ -348,3 +400,46 @@ create policy "routine_checks_insert" on routine_checks
 drop policy if exists "routine_checks_delete" on routine_checks;
 create policy "routine_checks_delete" on routine_checks
   for delete using (is_household_member(household_id));
+
+-- finance_notifications (somente leitura para os membros; o INSERT é feito
+-- pelo gatilho notify_despesa_lancada, que roda com privilégios elevados)
+alter table finance_notifications enable row level security;
+alter table finance_notification_reads enable row level security;
+
+drop policy if exists "finance_notifications_select" on finance_notifications;
+create policy "finance_notifications_select" on finance_notifications
+  for select using (is_household_member(household_id));
+
+-- finance_notification_reads: cada membro só vê e marca as próprias leituras
+drop policy if exists "finance_notification_reads_select" on finance_notification_reads;
+create policy "finance_notification_reads_select" on finance_notification_reads
+  for select using (
+    exists (
+      select 1 from household_members hm
+      where hm.id = finance_notification_reads.member_id
+        and hm.user_id = auth.uid()
+    )
+  );
+
+drop policy if exists "finance_notification_reads_insert" on finance_notification_reads;
+create policy "finance_notification_reads_insert" on finance_notification_reads
+  for insert with check (
+    exists (
+      select 1 from household_members hm
+      where hm.id = finance_notification_reads.member_id
+        and hm.user_id = auth.uid()
+    )
+  );
+
+-- ============================================================
+-- REALTIME: avisos chegam instantaneamente para os outros membros
+-- ============================================================
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'finance_notifications'
+  ) then
+    alter publication supabase_realtime add table finance_notifications;
+  end if;
+end $$;

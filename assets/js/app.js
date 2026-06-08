@@ -66,6 +66,32 @@ function renderSidebar(activeId, household) {
   if (nameEl && household) {
     nameEl.textContent = `${household.name} · código: ${household.invite_code}`;
   }
+
+  ensureNotifBell();
+}
+
+// Cria (uma única vez) o sino de avisos no topo da barra lateral.
+// O conteúdo é populado e mantido em dia por notifications.js.
+function ensureNotifBell() {
+  if (document.getElementById('notif-bell')) return;
+  const nameEl = document.getElementById('household-name');
+  if (!nameEl) return;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'notif-bell-wrapper';
+  wrapper.innerHTML = `
+    <button class="notif-bell" id="notif-bell" type="button" aria-label="Avisos de lançamentos">
+      <span>🔔</span>
+      <span>Avisos</span>
+      <span class="notif-badge hidden" id="notif-badge">0</span>
+    </button>
+    <div class="notif-dropdown hidden" id="notif-dropdown">
+      <div class="notif-dropdown-header">Avisos de despesas lançadas</div>
+      <div class="notif-list" id="notif-list">
+        <div class="empty-state">Nenhum aviso ainda.</div>
+      </div>
+    </div>`;
+  nameEl.insertAdjacentElement('afterend', wrapper);
 }
 
 function wireLogout() {
@@ -85,7 +111,9 @@ async function initAuthenticatedPage(activeId) {
   if (!ctx) return null;
   renderSidebar(activeId, ctx.household);
   wireLogout();
-  return { session, ...ctx };
+  const fullCtx = { session, ...ctx };
+  if (window.initNotifications) window.initNotifications(fullCtx);
+  return fullCtx;
 }
 
 function formatCurrency(value) {

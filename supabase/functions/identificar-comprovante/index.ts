@@ -71,11 +71,57 @@ Responda SOMENTE com o JSON, sem markdown, sem explicações adicionais.`;
   const text = body?.choices?.[0]?.message?.content ?? "";
   if (!text) throw new Error("Groq não retornou conteúdo.");
 
+  let parsed: Resultado;
   try {
-    return JSON.parse(text);
+    parsed = JSON.parse(text);
   } catch {
     throw new Error("Resposta do Groq não é JSON válido: " + text.slice(0, 300));
   }
+
+  parsed.valor = normalizarValor(parsed.valor);
+  if (parsed.valor == null) {
+    // Modelos às vezes deixam o valor de fora ou retornam em formato inesperado;
+    // como fallback, procuramos um valor monetário diretamente no texto do comprovante.
+    parsed.valor = extrairValorDoTexto(texto);
+  }
+  return parsed;
+}
+
+// Normaliza valores vindos do modelo (que podem chegar como número, string com
+// "R$", separador decimal por vírgula, etc.) para um número com ponto decimal.
+function normalizarValor(raw: unknown): number | null {
+  if (raw == null) return null;
+  if (typeof raw === "number") return Number.isFinite(raw) ? raw : null;
+
+  let str = String(raw).trim();
+  if (!str) return null;
+  str = str.replace(/[^\d,.\-]/g, "");
+  if (!str) return null;
+
+  if (str.includes(",") && str.includes(".")) {
+    // "1.234,56" (formato BR) -> "1234.56"
+    str = str.replace(/\./g, "").replace(",", ".");
+  } else if (str.includes(",")) {
+    // "1234,56" -> "1234.56"
+    str = str.replace(",", ".");
+  }
+
+  const num = Number(str);
+  return Number.isFinite(num) ? num : null;
+}
+
+// Procura o maior valor em formato monetário brasileiro no texto extraído do PDF
+// (ex.: "R$ 1.234,56" ou "129,90"), usado como fallback quando o modelo não retorna um valor.
+function extrairValorDoTexto(texto: string): number | null {
+  const matches = texto.match(/(?:R\$\s*)?\d{1,3}(?:\.\d{3})*,\d{2}\b/g);
+  if (!matches || matches.length === 0) return null;
+
+  const valores = matches
+    .map((m) => normalizarValor(m))
+    .filter((v): v is number => v != null && v > 0);
+  if (valores.length === 0) return null;
+
+  return Math.max(...valores);
 }
 
 // ─── Handler principal ────────────────────────────────────────────────────────
