@@ -19,6 +19,10 @@ no front-end e [Supabase](https://supabase.com) (Postgres + Auth) no back-end.
 - **Rotina familiar** — lista das atividades programadas para o dia (com
   horário, responsável e dias da semana) e opção de marcar "check" em cada uma
   ao concluí-la
+- **Identificar despesa por comprovante** — pelo celular, compartilhe o PDF do
+  comprovante de pagamento (ou selecione o arquivo) direto para o app; o texto
+  é lido localmente e uma IA (Groq) sugere o tipo de despesa entre as
+  categorias já cadastradas, com atalho para já abrir o lançamento preenchido
 
 ## Stack
 
@@ -37,6 +41,20 @@ no front-end e [Supabase](https://supabase.com) (Postgres + Auth) no back-end.
    `routine_activities`, `routine_checks`) e as políticas de Row Level Security
    que garantem que cada "casa" só vê seus próprios dados.
 3. Em **Project Settings → API**, copie a **Project URL** e a **anon public key**.
+
+### 1.1. (Opcional) Identificar despesa por comprovante
+
+Esse recurso usa uma Edge Function (`supabase/functions/identificar-comprovante`)
+que já está implantada no projeto e chama a [Groq API](https://console.groq.com)
+(gratuita) para classificar o tipo de despesa a partir do texto do comprovante.
+Para habilitar:
+
+1. Crie uma chave em [console.groq.com/keys](https://console.groq.com/keys).
+2. No Supabase Dashboard, vá em **Edge Functions → identificar-comprovante →
+   Secrets** e adicione `GROQ_API_KEY` com o valor da chave.
+
+Sem essa chave configurada, a página **Comprovante** continua acessível, mas a
+identificação retorna erro.
 
 ### 2. Configure as credenciais do front-end
 
@@ -78,7 +96,11 @@ ou com a extensão **Live Server** do VS Code. Depois acesse
    recebe um código de convite) ou **entre em uma casa existente** informando o
    código que outro morador compartilhou com você.
 3. Use o menu lateral para navegar entre **Início**, **Financeiro**, **Agenda**,
-   **Tarefas** e **Rotina familiar**.
+   **Tarefas**, **Rotina familiar** e **Comprovante**.
+4. Para identificar uma despesa pelo comprovante, abra **Comprovante** pelo
+   celular: use o botão **Compartilhar** do app do banco e escolha "Gestão de
+   Casa" (ou selecione o PDF manualmente). A IA sugere a categoria e oferece um
+   atalho para já abrir o lançamento de despesa preenchido.
 
 ## Estrutura do projeto
 
@@ -90,6 +112,7 @@ ou com a extensão **Live Server** do VS Code. Depois acesse
 ├── agenda.html           # Agenda / calendário
 ├── tarefas.html          # Divisão de tarefas (kanban)
 ├── rotina.html           # Rotina familiar (atividades do dia com check)
+├── comprovante.html      # Identificar tipo de despesa por comprovante (PDF)
 ├── assets/
 │   ├── css/style.css     # Estilos compartilhados
 │   └── js/
@@ -102,9 +125,12 @@ ou com a extensão **Live Server** do VS Code. Depois acesse
 │       ├── financeiro.js
 │       ├── agenda.js
 │       ├── tarefas.js
-│       └── rotina.js
+│       ├── rotina.js
+│       └── comprovante.js
 └── supabase/
-    └── schema.sql        # Tabelas + Row Level Security
+    ├── schema.sql        # Tabelas + Row Level Security
+    └── functions/
+        └── identificar-comprovante/   # Edge Function (Groq) que sugere a categoria
 ```
 
 ## Segurança

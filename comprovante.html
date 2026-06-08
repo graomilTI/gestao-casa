@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identificar comprovante · Gestão de Casa</title>
+  <meta name="theme-color" content="#0e1016" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="assets/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Gestão de Casa" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">🏡 Gestão de Casa</div>
+      <div class="household-name" id="household-name">Carregando…</div>
+      <nav id="sidebar-nav"></nav>
+      <div class="spacer"></div>
+      <button class="btn-logout" id="btn-logout">↪ Sair</button>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div>
+          <h1>Identificar despesa por comprovante</h1>
+          <p>Compartilhe ou selecione o comprovante de pagamento em PDF para identificar automaticamente o tipo de despesa.</p>
+        </div>
+      </div>
+
+      <div class="card" id="comprovante-card" style="max-width: 560px;">
+        <div id="comprovante-alert"></div>
+
+        <div id="comprovante-idle">
+          <div class="empty-state" style="padding: 30px 10px 20px;">
+            <p style="font-size: 2.6rem; margin: 0 0 8px;">📎</p>
+            <p>No celular, use a opção <strong>Compartilhar</strong> do app do banco e escolha "Gestão de Casa", ou selecione o arquivo PDF abaixo.</p>
+          </div>
+          <div class="form-group">
+            <label for="comprovante-file">Comprovante (PDF)</label>
+            <input type="file" id="comprovante-file" accept="application/pdf" />
+          </div>
+        </div>
+
+        <div id="comprovante-loading" class="hidden">
+          <div class="empty-state" style="padding: 50px 10px;">
+            <p style="font-size: 2.2rem; margin: 0 0 10px;">⏳</p>
+            <p id="comprovante-loading-label">Lendo o comprovante…</p>
+          </div>
+        </div>
+
+        <div id="comprovante-result" class="hidden">
+          <span class="badge normal">Tipo de despesa identificado</span>
+          <h2 id="result-categoria" style="margin: 10px 0 6px;"></h2>
+          <p id="result-motivo" style="color: var(--color-muted); font-size: 0.88rem;"></p>
+          <div class="modal-actions" style="justify-content: flex-start; margin-top: 20px;">
+            <button class="btn" id="btn-lancar-despesa">Lançar despesa nessa categoria</button>
+            <button class="btn secondary" id="btn-novo-comprovante">Tentar outro comprovante</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.min.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/comprovante.js"></script>
+</body>
+</html>

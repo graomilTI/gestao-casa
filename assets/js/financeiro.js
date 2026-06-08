@@ -22,6 +22,24 @@
   await loadTransactions();
   wireTransactionModal();
   wireCategoryModal();
+  openTransactionFromQueryParams();
+
+  // Abre o modal de novo lançamento pré-preenchido quando vindo da identificação
+  // de comprovante (comprovante.html?categoria=...&tipo=despesa&descricao=...)
+  function openTransactionFromQueryParams() {
+    const params = new URLSearchParams(window.location.search);
+    const categoria = params.get('categoria');
+    const tipo = params.get('tipo');
+    const descricao = params.get('descricao');
+    if (!categoria && !tipo && !descricao) return;
+
+    openTransactionModal(null);
+    if (tipo) document.getElementById('transaction-type').value = tipo;
+    if (categoria) document.getElementById('transaction-category').value = categoria;
+    if (descricao) document.getElementById('transaction-description').value = descricao;
+
+    window.history.replaceState({}, '', 'financeiro.html');
+  }
 
   // ---------------- Categorias ----------------
   async function loadCategories() {
