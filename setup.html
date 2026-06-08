@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configurar casa · Gestão de Casa</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card" style="max-width: 480px;">
+      <h1>Configure sua casa</h1>
+      <p class="subtitle">Crie uma casa nova ou entre em uma existente usando um código de convite.</p>
+
+      <div id="setup-alert"></div>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h2 style="margin-top:0; font-size: 1rem;">Criar uma nova casa</h2>
+        <form id="create-household-form">
+          <div class="form-group">
+            <label for="new-household-name">Nome da casa</label>
+            <input type="text" id="new-household-name" required placeholder="Ex.: Casa da Família Silva" />
+          </div>
+          <div class="form-group">
+            <label for="new-household-display-name">Como você quer ser chamado(a)</label>
+            <input type="text" id="new-household-display-name" required />
+          </div>
+          <button type="submit" class="btn" style="width:100%;">Criar casa</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0; font-size: 1rem;">Entrar em uma casa existente</h2>
+        <form id="join-household-form">
+          <div class="form-group">
+            <label for="invite-code">Código de convite</label>
+            <input type="text" id="invite-code" required placeholder="Ex.: a1b2c3d4" />
+          </div>
+          <div class="form-group">
+            <label for="join-household-display-name">Como você quer ser chamado(a)</label>
+            <input type="text" id="join-household-display-name" required />
+          </div>
+          <button type="submit" class="btn secondary" style="width:100%;">Entrar na casa</button>
+        </form>
+      </div>
+
+      <div class="auth-toggle">
+        <a id="btn-logout-setup">Sair da conta</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/setup.js"></script>
+</body>
+</html>

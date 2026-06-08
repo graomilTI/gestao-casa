@@ -1,0 +1,434 @@
+:root {
+  --color-bg: #f5f6fb;
+  --color-card: #ffffff;
+  --color-primary: #6366f1;
+  --color-primary-dark: #4f46e5;
+  --color-text: #1f2333;
+  --color-muted: #6b7280;
+  --color-border: #e5e7eb;
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --color-warning: #d97706;
+  --radius: 12px;
+  --shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+}
+
+a { color: inherit; }
+
+/* ---------- Layout ---------- */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 230px;
+  flex-shrink: 0;
+  background: var(--color-card);
+  border-right: 1px solid var(--color-border);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar .brand {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  padding: 8px 10px 18px;
+}
+
+.sidebar .household-name {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+  padding: 0 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 8px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--color-text);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.nav-link:hover { background: #eef0fe; }
+.nav-link.active { background: var(--color-primary); color: #fff; }
+
+.sidebar .spacer { flex: 1; }
+
+.btn-logout {
+  margin: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  text-align: left;
+}
+.btn-logout:hover { background: #fee2e2; color: var(--color-danger); border-color: transparent; }
+
+.main {
+  flex: 1;
+  padding: 28px 36px;
+  max-width: 1200px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-header h1 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.page-header p {
+  margin: 4px 0 0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+/* ---------- Cards / componentes ---------- */
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.grid {
+  display: grid;
+  gap: 18px;
+}
+
+.grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.grid.cols-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+.stat-card .label {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-card .value {
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.stat-card.positive .value { color: var(--color-success); }
+.stat-card.negative .value { color: var(--color-danger); }
+
+/* ---------- Forms ---------- */
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--color-muted);
+}
+
+input, select, textarea, button {
+  font-family: inherit;
+  font-size: 0.92rem;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  color: var(--color-text);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+textarea { resize: vertical; min-height: 70px; }
+
+.row { display: flex; gap: 14px; flex-wrap: wrap; }
+.row > * { flex: 1; min-width: 160px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background: var(--color-primary);
+  color: #fff;
+  transition: background .15s ease;
+}
+.btn:hover { background: var(--color-primary-dark); }
+.btn.secondary {
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+.btn.secondary:hover { background: #f3f4f6; }
+.btn.danger { background: var(--color-danger); }
+.btn.danger:hover { background: #b91c1c; }
+.btn.small { padding: 6px 12px; font-size: 0.8rem; }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+
+/* ---------- Tabelas e listas ---------- */
+table { width: 100%; border-collapse: collapse; }
+th, td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.88rem;
+}
+th { color: var(--color-muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: .03em; }
+tr:last-child td { border-bottom: none; }
+
+.amount-receita { color: var(--color-success); font-weight: 600; }
+.amount-despesa { color: var(--color-danger); font-weight: 600; }
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+.badge.pendente { background: #fef3c7; color: #92400e; }
+.badge.em_andamento { background: #dbeafe; color: #1e40af; }
+.badge.concluida { background: #dcfce7; color: #166534; }
+.badge.alta { background: #fee2e2; color: #991b1b; }
+.badge.normal { background: #e5e7eb; color: #374151; }
+.badge.baixa { background: #f3f4f6; color: #6b7280; }
+
+.empty-state {
+  text-align: center;
+  color: var(--color-muted);
+  padding: 40px 20px;
+  font-size: 0.9rem;
+}
+
+/* ---------- Auth ---------- */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--color-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 32px;
+}
+.auth-card h1 {
+  font-size: 1.4rem;
+  margin: 0 0 4px;
+  color: var(--color-primary-dark);
+}
+.auth-card p.subtitle { color: var(--color-muted); margin: 0 0 24px; font-size: 0.88rem; }
+.auth-toggle {
+  display: flex;
+  margin-top: 18px;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  gap: 6px;
+  justify-content: center;
+}
+.auth-toggle a { color: var(--color-primary); font-weight: 600; text-decoration: none; cursor: pointer; }
+
+.alert {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  margin-bottom: 14px;
+}
+.alert.error { background: #fee2e2; color: #991b1b; }
+.alert.success { background: #dcfce7; color: #166534; }
+.alert.info { background: #e0e7ff; color: #3730a3; }
+
+/* ---------- Modal ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 20px;
+}
+.modal {
+  background: #fff;
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+.modal h2 { margin-top: 0; font-size: 1.2rem; }
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+.hidden { display: none !important; }
+
+/* ---------- Agenda ---------- */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+.calendar-weekday {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  padding-bottom: 4px;
+}
+.calendar-day {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  min-height: 92px;
+  padding: 6px;
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+.calendar-day:hover { border-color: var(--color-primary); }
+.calendar-day.outside { opacity: 0.4; }
+.calendar-day.today { border-color: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary); }
+.calendar-day .day-number { font-weight: 700; }
+.calendar-event {
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.calendar-nav h2 { margin: 0; font-size: 1.15rem; min-width: 180px; text-align: center; text-transform: capitalize; }
+
+/* ---------- Tarefas (kanban) ---------- */
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.kanban-column {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px;
+  min-height: 200px;
+}
+.kanban-column h3 {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kanban-column h3 .count {
+  background: var(--color-bg);
+  color: var(--color-muted);
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 0.74rem;
+}
+.task-card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.task-card h4 { margin: 0 0 6px; font-size: 0.9rem; }
+.task-card p { margin: 0 0 8px; font-size: 0.8rem; color: var(--color-muted); }
+.task-card .meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  color: var(--color-muted);
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.task-card .actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+}
+.member-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+@media (max-width: 880px) {
+  .app-shell { flex-direction: column; }
+  .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .sidebar .spacer { display: none; }
+  .main { padding: 20px; }
+  .kanban { grid-template-columns: 1fr; }
+}

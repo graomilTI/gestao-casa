@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entrar · Gestão de Casa</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card">
+      <h1 id="auth-title">Entrar</h1>
+      <p class="subtitle" id="auth-subtitle">Acesse o sistema de gestão da sua casa.</p>
+
+      <div id="auth-alert"></div>
+
+      <form id="auth-form">
+        <div class="form-group hidden" id="field-name">
+          <label for="field-name-input">Seu nome</label>
+          <input type="text" id="field-name-input" placeholder="Como prefere ser chamado(a)" />
+        </div>
+        <div class="form-group">
+          <label for="field-email">E-mail</label>
+          <input type="email" id="field-email" required placeholder="voce@exemplo.com" />
+        </div>
+        <div class="form-group">
+          <label for="field-password">Senha</label>
+          <input type="password" id="field-password" required minlength="6" placeholder="Mínimo de 6 caracteres" />
+        </div>
+        <button type="submit" class="btn" id="auth-submit" style="width: 100%;">Entrar</button>
+      </form>
+
+      <div class="auth-toggle">
+        <span id="auth-toggle-text">Ainda não tem conta?</span>
+        <a id="auth-toggle-link">Cadastre-se</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/auth.js"></script>
+</body>
+</html>

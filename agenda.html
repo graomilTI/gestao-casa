@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agenda · Gestão de Casa</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">🏡 Gestão de Casa</div>
+      <div class="household-name" id="household-name">Carregando…</div>
+      <nav id="sidebar-nav"></nav>
+      <div class="spacer"></div>
+      <button class="btn-logout" id="btn-logout">↪ Sair</button>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div>
+          <h1>Agenda da casa</h1>
+          <p>Compromissos e eventos compartilhados pela família.</p>
+        </div>
+        <button class="btn" id="btn-new-event">+ Novo evento</button>
+      </div>
+
+      <div class="card">
+        <div class="page-header" style="margin-bottom: 16px;">
+          <div class="calendar-nav">
+            <button class="btn secondary small" id="btn-prev-month">‹</button>
+            <h2 id="calendar-title">—</h2>
+            <button class="btn secondary small" id="btn-next-month">›</button>
+          </div>
+          <button class="btn secondary small" id="btn-today">Hoje</button>
+        </div>
+
+        <div class="calendar-grid" id="calendar-weekdays"></div>
+        <div class="calendar-grid" id="calendar-grid" style="margin-top:6px;"></div>
+      </div>
+
+      <div class="card" style="margin-top: 18px;">
+        <h2 style="margin-top:0; font-size: 1.05rem;" id="day-events-title">Eventos</h2>
+        <div id="day-events-list"><div class="empty-state">Selecione um dia no calendário.</div></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: novo/editar evento -->
+  <div class="modal-overlay hidden" id="modal-event">
+    <div class="modal">
+      <h2 id="event-modal-title">Novo evento</h2>
+      <div id="event-modal-alert"></div>
+      <form id="event-form">
+        <input type="hidden" id="event-id" />
+        <div class="form-group">
+          <label for="event-title">Título</label>
+          <input type="text" id="event-title" required placeholder="Ex.: Consulta médica" />
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label for="event-start">Início</label>
+            <input type="datetime-local" id="event-start" required />
+          </div>
+          <div class="form-group">
+            <label for="event-end">Término (opcional)</label>
+            <input type="datetime-local" id="event-end" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="event-location">Local</label>
+          <input type="text" id="event-location" placeholder="Opcional" />
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label for="event-color">Cor</label>
+            <input type="color" id="event-color" value="#6366f1" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="event-description">Descrição</label>
+          <textarea id="event-description" placeholder="Opcional"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn danger hidden" id="btn-delete-event">Excluir</button>
+          <button type="button" class="btn secondary" id="btn-cancel-event">Cancelar</button>
+          <button type="submit" class="btn" id="btn-save-event">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/agenda.js"></script>
+</body>
+</html>
