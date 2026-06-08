@@ -88,7 +88,48 @@ create table if not exists finance_notification_reads (
   primary key (notification_id, member_id)
 );
 
--- Sempre que uma despesa é lançada, grava um aviso para a casa toda.
+-- ============================================================
+-- TABELA: push_subscriptions (inscrições de Web Push por dispositivo)
+-- Permite enviar notificações do sistema mesmo com o app fechado.
+-- ============================================================
+create table if not exists push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid not null references households(id) on delete cascade,
+  member_id uuid not null references household_members(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  endpoint text not null unique,
+  p256dh text not null,
+  auth_key text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_push_subscriptions_household on push_subscriptions (household_id);
+
+-- ============================================================
+-- Web Push: extensão para chamadas HTTP assíncronas a partir de gatilhos
+-- e segredo compartilhado (Vault) para o gatilho autenticar a chamada à
+-- Edge Function enviar-notificacao-push.
+--
+-- IMPORTANTE: troque 'SEU_SEGREDO_AQUI' por um valor aleatório (ex.: gerado
+-- com `openssl rand -base64 32`) e configure o MESMO valor como secret
+-- PUSH_TRIGGER_SECRET da Edge Function enviar-notificacao-push.
+-- ============================================================
+create extension if not exists pg_net;
+
+do $$
+begin
+  if not exists (select 1 from vault.decrypted_secrets where name = 'push_trigger_secret') then
+    perform vault.create_secret(
+      'SEU_SEGREDO_AQUI',
+      'push_trigger_secret',
+      'Segredo compartilhado: gatilho notify_despesa_lancada -> Edge Function enviar-notificacao-push'
+    );
+  end if;
+end $$;
+
+-- Sempre que uma despesa é lançada, grava um aviso para a casa toda e
+-- aciona (via pg_net, autenticado com o segredo do Vault) o envio de
+-- notificações do sistema (Web Push) para os demais membros.
 -- SECURITY DEFINER: o gatilho roda com privilégios do dono (postgres),
 -- que tem BYPASSRLS, então o INSERT funciona independente de quem lançou.
 create or replace function notify_despesa_lancada()
@@ -99,12 +140,25 @@ set search_path = public
 as $$
 declare
   v_categoria text;
+  v_notification_id uuid;
+  v_secret text;
 begin
   if new.type = 'despesa' then
     select name into v_categoria from finance_categories where id = new.category_id;
 
     insert into finance_notifications (household_id, transaction_id, created_by, category_name, description, amount)
-    values (new.household_id, new.id, new.created_by, v_categoria, new.description, new.amount);
+    values (new.household_id, new.id, new.created_by, v_categoria, new.description, new.amount)
+    returning id into v_notification_id;
+
+    select decrypted_secret into v_secret from vault.decrypted_secrets where name = 'push_trigger_secret';
+
+    if v_secret is not null then
+      perform net.http_post(
+        url := 'https://jcojfftltopwgkbrusjb.supabase.co/functions/v1/enviar-notificacao-push',
+        headers := jsonb_build_object('Content-Type', 'application/json', 'x-internal-secret', v_secret),
+        body := jsonb_build_object('notification_id', v_notification_id)
+      );
+    end if;
   end if;
   return new;
 end;
@@ -430,6 +484,27 @@ create policy "finance_notification_reads_insert" on finance_notification_reads
         and hm.user_id = auth.uid()
     )
   );
+
+-- push_subscriptions: cada usuário só vê e gerencia as próprias inscrições
+-- (a Edge Function enviar-notificacao-push usa a service role para ler de
+-- todos os membros da casa ao disparar os pushes)
+alter table push_subscriptions enable row level security;
+
+drop policy if exists "push_subscriptions_select" on push_subscriptions;
+create policy "push_subscriptions_select" on push_subscriptions
+  for select using (user_id = auth.uid());
+
+drop policy if exists "push_subscriptions_insert" on push_subscriptions;
+create policy "push_subscriptions_insert" on push_subscriptions
+  for insert with check (user_id = auth.uid() and is_household_member(household_id));
+
+drop policy if exists "push_subscriptions_update" on push_subscriptions;
+create policy "push_subscriptions_update" on push_subscriptions
+  for update using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+drop policy if exists "push_subscriptions_delete" on push_subscriptions;
+create policy "push_subscriptions_delete" on push_subscriptions
+  for delete using (user_id = auth.uid());
 
 -- ============================================================
 -- REALTIME: avisos chegam instantaneamente para os outros membros

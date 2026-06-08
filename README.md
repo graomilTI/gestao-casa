@@ -26,8 +26,9 @@ no front-end e [Supabase](https://supabase.com) (Postgres + Auth) no back-end.
   preenchido (categoria, descrição e valor)
 - **Avisos de lançamentos** — sempre que alguém lança uma despesa, os outros
   moradores recebem um aviso em tempo real (sino na barra lateral) com a
-  categoria e o valor, além de uma notificação do sistema (PWA) se a permissão
-  estiver concedida
+  categoria e o valor, além de uma notificação do sistema via **Web Push**
+  (aparece na barra de notificações do celular mesmo com o app fechado, se a
+  permissão estiver concedida)
 
 ## Stack
 
@@ -43,10 +44,14 @@ no front-end e [Supabase](https://supabase.com) (Postgres + Auth) no back-end.
 2. No **SQL Editor**, execute o script [`supabase/schema.sql`](supabase/schema.sql).
    Ele cria todas as tabelas (`households`, `household_members`,
    `finance_categories`, `finance_transactions`, `finance_notifications`,
-   `finance_notification_reads`, `agenda_events`, `tasks`,
-   `routine_activities`, `routine_checks`), o gatilho que gera os avisos de
-   despesa e as políticas de Row Level Security
-   que garantem que cada "casa" só vê seus próprios dados.
+   `finance_notification_reads`, `push_subscriptions`, `agenda_events`,
+   `tasks`, `routine_activities`, `routine_checks`), o gatilho que gera os
+   avisos de despesa (e aciona o envio de Web Push) e as políticas de Row
+   Level Security que garantem que cada "casa" só vê seus próprios dados.
+
+   > Antes de rodar o script, troque `'SEU_SEGREDO_AQUI'` (na seção "Web
+   > Push" do `schema.sql`) por um valor aleatório — esse mesmo valor você
+   > vai configurar como secret `PUSH_TRIGGER_SECRET` no passo 1.2.
 3. Em **Project Settings → API**, copie a **Project URL** e a **anon public key**.
 
 ### 1.1. (Opcional) Identificar despesa por comprovante
@@ -62,6 +67,29 @@ Para habilitar:
 
 Sem essa chave configurada, a página **Comprovante** continua acessível, mas a
 identificação retorna erro.
+
+### 1.2. (Opcional) Notificações do sistema (Web Push)
+
+Para os avisos de despesa chegarem como notificação do sistema mesmo com o
+app fechado, é preciso configurar o par de chaves **VAPID** e o segredo
+interno usados pela Edge Function `enviar-notificacao-push` (já implantada no
+projeto e acionada automaticamente pelo gatilho do banco via `pg_net`):
+
+1. Gere um par de chaves VAPID (ex.: com `npx web-push generate-vapid-keys`
+   ou qualquer gerador ECDSA P-256 — a chave pública vai no código do app em
+   `assets/js/notifications.js`, na constante `VAPID_PUBLIC_KEY`, e a privada
+   fica só no servidor).
+2. No Supabase Dashboard, vá em **Edge Functions → enviar-notificacao-push →
+   Secrets** e adicione:
+   - `VAPID_PUBLIC_KEY` — a chave pública gerada
+   - `VAPID_PRIVATE_KEY` — a chave privada gerada (nunca exponha publicamente)
+   - `VAPID_SUBJECT` — um contato no formato `mailto:seu-email@exemplo.com`
+   - `PUSH_TRIGGER_SECRET` — o mesmo valor aleatório usado no lugar de
+     `'SEU_SEGREDO_AQUI'` ao rodar o `schema.sql` (passo 1)
+
+Sem essa configuração, os avisos continuam funcionando normalmente em tempo
+real dentro do app (sino na barra lateral); só a notificação do sistema fora
+do app não será exibida.
 
 ### 2. Configure as credenciais do front-end
 
@@ -110,9 +138,10 @@ ou com a extensão **Live Server** do VS Code. Depois acesse
    oferece um atalho para já abrir o lançamento de despesa preenchido.
 5. Sempre que alguém lançar uma despesa em **Financeiro**, os demais moradores
    recebem um aviso instantâneo no sino 🔔 da barra lateral (categoria e
-   valor). Ao clicar no sino pela primeira vez, o navegador pode pedir
-   permissão para enviar **notificações do sistema** — aceite para também
-   receber o aviso fora da aba do app.
+   valor). Ao clicar no sino pela primeira vez, o navegador pede permissão
+   para enviar **notificações do sistema** — aceite para também receber o
+   aviso na barra de notificações do celular, mesmo com o app fechado
+   (Web Push).
 
 ## Estrutura do projeto
 
@@ -143,7 +172,8 @@ ou com a extensão **Live Server** do VS Code. Depois acesse
 └── supabase/
     ├── schema.sql        # Tabelas + Row Level Security
     └── functions/
-        └── identificar-comprovante/   # Edge Function (Groq) que sugere a categoria
+        ├── identificar-comprovante/   # Edge Function (Groq) que sugere a categoria
+        └── enviar-notificacao-push/   # Edge Function que envia o Web Push aos membros
 ```
 
 ## Segurança

@@ -3,7 +3,7 @@
 // deixando passar direto requisições de outras origens (Supabase, CDN do supabase-js)
 // para nunca servir dados financeiros/agenda/tarefas desatualizados do cache.
 
-const CACHE_NAME = 'gestao-casa-v4';
+const CACHE_NAME = 'gestao-casa-v5';
 const SHARE_CACHE = 'gestao-casa-shared-file';
 const SHARED_FILE_KEY = '/shared-comprovante';
 
@@ -81,6 +81,41 @@ self.addEventListener('fetch', (event) => {
         .catch(() => cached);
 
       return cached || networkFetch;
+    })
+  );
+});
+
+// Web Push — exibe a notificação do sistema mesmo com o app fechado
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { title: 'Gestão de Casa', body: event.data ? event.data.text() : '' };
+  }
+
+  const title = data.title || 'Gestão de Casa';
+  const options = {
+    body: data.body || '',
+    icon: './assets/icons/icon-192.png',
+    badge: './assets/icons/icon-192.png',
+    tag: data.tag || 'gestao-casa-push',
+    data: { url: data.url || './financeiro.html' },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data && event.notification.data.url ? event.notification.data.url : './financeiro.html';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsList) => {
+      for (const client of clientsList) {
+        if (client.url.includes(targetUrl.replace('./', '')) && 'focus' in client) return client.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
     })
   );
 });

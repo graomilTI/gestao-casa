@@ -5,6 +5,9 @@
 // se a permissão estiver concedida, mostramos uma notificação do sistema.
 
 (function () {
+  // Chave pública VAPID — é segura para ficar no código (a privada fica só no servidor)
+  const VAPID_PUBLIC_KEY = 'BP89pAS6oWZX4fokSjawJ1eik2qZKfAR4U-Gow7BROd8G0d-mbLIJv-4XmY0v400U7ljYtrdz51Ag1nqLTW1_Os';
+
   let ctx = null;
   let notifications = [];
   let readIds = new Set();
@@ -17,6 +20,10 @@
     await loadNotifications();
     wireUI();
     subscribeRealtime();
+
+    if ('Notification' in window && Notification.permission === 'granted') {
+      ensurePushSubscription();
+    }
   };
 
   async function loadNotifications() {
@@ -109,7 +116,10 @@
       dropdown.classList.toggle('hidden', !opening);
       if (opening) {
         if ('Notification' in window && Notification.permission === 'default') {
-          Notification.requestPermission();
+          const permission = await Notification.requestPermission();
+          if (permission === 'granted') ensurePushSubscription();
+        } else if ('Notification' in window && Notification.permission === 'granted') {
+          ensurePushSubscription();
         }
         await markVisibleAsRead();
       }
@@ -183,6 +193,54 @@
     } else {
       new Notification(title, options);
     }
+  }
+
+  // Registra este dispositivo para receber notificações do sistema mesmo
+  // com o app fechado (Web Push) e salva a inscrição no Supabase.
+  async function ensurePushSubscription() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if (!ctx || !ctx.household || !ctx.member) return;
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      let subscription = await registration.pushManager.getSubscription();
+      if (!subscription) {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        });
+      }
+      await savePushSubscription(subscription);
+    } catch (err) {
+      console.warn('Não foi possível registrar notificações push:', err);
+    }
+  }
+
+  async function savePushSubscription(subscription) {
+    const json = subscription.toJSON();
+    if (!json.endpoint || !json.keys) return;
+
+    const { error } = await window.supabaseClient.from('push_subscriptions').upsert(
+      {
+        household_id: ctx.household.id,
+        member_id: ctx.member.id,
+        user_id: ctx.session.user.id,
+        endpoint: json.endpoint,
+        p256dh: json.keys.p256dh,
+        auth_key: json.keys.auth,
+      },
+      { onConflict: 'endpoint' }
+    );
+    if (error) console.error('Falha ao salvar inscrição push:', error);
+  }
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = atob(base64);
+    const output = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; i++) output[i] = rawData.charCodeAt(i);
+    return output;
   }
 
   function escapeHtml(str) {
