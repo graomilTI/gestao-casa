@@ -308,6 +308,7 @@ textarea { resize: vertical; min-height: 70px; }
 .btn:disabled { opacity: .6; cursor: not-allowed; }
 
 /* ---------- Tabelas e listas ---------- */
+.table-scroll { width: 100%; overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th, td {
   text-align: left;
@@ -615,4 +616,8 @@ tr:last-child td { border-bottom: none; }
   .sidebar .spacer { display: none; }
   .main { padding: 20px; }
   .kanban { grid-template-columns: 1fr; }
+
+  th, td { padding: 8px; font-size: 0.82rem; }
+  td:last-child { white-space: nowrap; }
+  .btn.small { padding: 5px 9px; font-size: 0.76rem; }
 }

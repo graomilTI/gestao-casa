@@ -164,28 +164,29 @@
     }
 
     tableContainer.innerHTML = `
-      <table>
-        <thead>
-          <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th></th></tr>
-        </thead>
-        <tbody>
-          ${filtered
-            .map(
-              (t) => `
-            <tr>
-              <td>${formatDate(t.occurred_on)}</td>
-              <td>${escapeHtml(t.description)}${t.notes ? `<div style="font-size:0.78rem; color:var(--color-muted);">${escapeHtml(t.notes)}</div>` : ''}</td>
-              <td>${t.finance_categories ? escapeHtml(t.finance_categories.name) : '—'}</td>
-              <td class="amount-${t.type}">${t.type === 'receita' ? '+' : '-'} ${formatCurrency(t.amount)}</td>
-              <td>
-                <button class="btn secondary small" data-edit="${t.id}">Editar</button>
-                <button class="btn danger small" data-delete="${t.id}">Excluir</button>
-              </td>
-            </tr>`
-            )
-            .join('')}
-        </tbody>
-      </table>`;
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Data</th><th>Descrição</th><th>Valor</th><th></th></tr>
+          </thead>
+          <tbody>
+            ${filtered
+              .map(
+                (t) => `
+              <tr>
+                <td>${formatDate(t.occurred_on)}</td>
+                <td>${escapeHtml(t.description)}${t.notes ? `<div style="font-size:0.78rem; color:var(--color-muted);">${escapeHtml(t.notes)}</div>` : ''}</td>
+                <td class="amount-${t.type}">${t.type === 'receita' ? '+' : '-'} ${formatCurrency(t.amount)}</td>
+                <td>
+                  <button class="btn secondary small" data-edit="${t.id}">Editar</button>
+                  <button class="btn danger small" data-delete="${t.id}">Excluir</button>
+                </td>
+              </tr>`
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>`;
 
     tableContainer.querySelectorAll('[data-edit]').forEach((btn) =>
       btn.addEventListener('click', () => openTransactionModal(btn.dataset.edit))
