@@ -118,3 +118,10 @@ function memberLabel(members, memberId) {
   if (!m) return '<span class="member-chip">Sem responsável</span>';
   return `<span class="member-chip"><span class="member-dot" style="background:${m.color}"></span>${m.display_name}</span>`;
 }
+
+// Registra o service worker do PWA (presente em todas as páginas via app.js)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((err) => console.warn('Falha ao registrar service worker:', err));
+  });
+}
