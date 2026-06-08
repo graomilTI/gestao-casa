@@ -28,6 +28,15 @@
     '<option value="">Toda a família</option>' +
     members.map((m) => `<option value="${m.id}">${escapeHtml(m.display_name)}</option>`).join('');
 
+  const filterMember = document.getElementById('filter-member');
+  filterMember.innerHTML =
+    '<option value="">Todos os responsáveis</option>' +
+    members.map((m) => `<option value="${m.id}">${escapeHtml(m.display_name)}</option>`).join('');
+  filterMember.addEventListener('change', () => {
+    renderList();
+    renderAllActivities();
+  });
+
   wireActivityModal();
   await loadActivities();
 
@@ -64,11 +73,15 @@
   }
 
   function renderList() {
-    const todays = activities.filter((a) => (a.weekdays || []).includes(todayWeekday));
+    const todays = activities
+      .filter((a) => (a.weekdays || []).includes(todayWeekday))
+      .filter(matchesMemberFilter);
     const list = document.getElementById('routine-list');
 
     if (todays.length === 0) {
-      list.innerHTML = `<div class="empty-state">Nenhuma atividade programada para hoje. Toque em "+ Nova atividade" para começar.</div>`;
+      list.innerHTML = filterMember.value
+        ? `<div class="empty-state">Nenhuma atividade para esse responsável hoje.</div>`
+        : `<div class="empty-state">Nenhuma atividade programada para hoje. Toque em "+ Nova atividade" para começar.</div>`;
       updateProgress(0, 0);
       return;
     }
@@ -102,14 +115,17 @@
   }
 
   function renderAllActivities() {
+    const filtered = activities.filter(matchesMemberFilter);
     const container = document.getElementById('routine-all-list');
 
-    if (activities.length === 0) {
-      container.innerHTML = '<div class="empty-state">Nenhuma atividade cadastrada ainda.</div>';
+    if (filtered.length === 0) {
+      container.innerHTML = filterMember.value
+        ? '<div class="empty-state">Nenhuma atividade cadastrada para esse responsável.</div>'
+        : '<div class="empty-state">Nenhuma atividade cadastrada ainda.</div>';
       return;
     }
 
-    container.innerHTML = activities.map(allActivityHtml).join('');
+    container.innerHTML = filtered.map(allActivityHtml).join('');
     container.querySelectorAll('[data-edit]').forEach((btn) =>
       btn.addEventListener('click', () => openActivityModal(btn.dataset.edit))
     );
@@ -132,6 +148,11 @@
           <button class="btn secondary small" data-edit="${a.id}">Editar</button>
         </div>
       </div>`;
+  }
+
+  function matchesMemberFilter(a) {
+    const filterValue = filterMember.value;
+    return !filterValue || !a.assigned_to || a.assigned_to === filterValue;
   }
 
   function isChecked(activityId) {
